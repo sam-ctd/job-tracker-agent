@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/sam-ctd/job-tracker-agent/internal/agent"
 	"github.com/sam-ctd/job-tracker-agent/internal/api"
 	"github.com/sam-ctd/job-tracker-agent/internal/config"
 	"github.com/sam-ctd/job-tracker-agent/internal/db"
@@ -29,7 +30,20 @@ func main() {
 	}
 
 	st := store.New(pool)
-	srv := api.New(st, pool, cfg.APIKey, cfg.CORSOrigins)
+	agentOpts := agent.Options{
+		LLM: agent.LLMConfig{
+			APIKey:  cfg.LLMAPIKey,
+			BaseURL: cfg.LLMBaseURL,
+			Model:   cfg.LLMModel,
+		},
+	}
+	if cfg.LLMAPIKey != "" {
+		log.Printf("agent brain: llm (%s)", cfg.LLMModel)
+	} else {
+		log.Printf("agent brain: rules (set LLM_API_KEY to enable LLM)")
+	}
+
+	srv := api.New(st, pool, cfg.APIKey, cfg.CORSOrigins, agentOpts)
 
 	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)

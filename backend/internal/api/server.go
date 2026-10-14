@@ -18,10 +18,10 @@ type Server struct {
 	corsOrigins []string
 }
 
-func New(st *store.Store, pool *pgxpool.Pool, apiKey string, corsOrigins []string) *Server {
+func New(st *store.Store, pool *pgxpool.Pool, apiKey string, corsOrigins []string, agentOpts agent.Options) *Server {
 	return &Server{
 		store:       st,
-		agent:       agent.New(st),
+		agent:       agent.New(st, agentOpts),
 		pool:        pool,
 		apiKey:      apiKey,
 		corsOrigins: corsOrigins,

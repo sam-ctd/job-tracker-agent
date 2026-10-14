@@ -7,14 +7,22 @@ import (
 	"github.com/sam-ctd/job-tracker-agent/internal/store"
 )
 
-// Agent runs a rule-based brain that picks tools and calls the store.
-// 3c: replace decide() with an LLM; Catalog/SystemPrompt/runTool stay.
+// Agent: brain elige tool → runTool ejecuta sobre el store.
 type Agent struct {
 	store *store.Store
+	brain Brain
 }
 
-func New(st *store.Store) *Agent {
-	return &Agent{store: st}
+type Options struct {
+	LLM LLMConfig // si APIKey vacío → solo RulesBrain
+}
+
+func New(st *store.Store, opts Options) *Agent {
+	var brain Brain = RulesBrain{}
+	if strings.TrimSpace(opts.LLM.APIKey) != "" {
+		brain = NewLLMBrain(opts.LLM, RulesBrain{})
+	}
+	return &Agent{store: st, brain: brain}
 }
 
 // Reply is what /api/chat returns.
@@ -24,6 +32,7 @@ type Reply struct {
 	Args     map[string]string `json:"args,omitempty"`
 	Result   any               `json:"result,omitempty"`
 	HelpHint string            `json:"help_hint,omitempty"`
+	Brain    string            `json:"brain,omitempty"` // "llm" | "rules"
 }
 
 func (a *Agent) Chat(ctx context.Context, userMessage string) (Reply, error) {
@@ -32,23 +41,31 @@ func (a *Agent) Chat(ctx context.Context, userMessage string) (Reply, error) {
 		return Reply{
 			Message:  "Escribe un mensaje. Puedo listar, stats, due, crear y actualizar candidaturas.",
 			HelpHint: helpText(),
+			Brain:    "rules",
 		}, nil
 	}
 
-	call, ok := decide(msg)
-	if !ok {
-		return Reply{
-			Message:  "No sé qué tool usar todavía (brain fake, sin LLM).",
-			HelpHint: helpText(),
-		}, nil
+	dec, err := a.brain.Decide(ctx, msg)
+	if err != nil {
+		return Reply{}, err
 	}
 
+	if dec.Call == nil {
+		out := Reply{Message: dec.Message, Brain: dec.Source, HelpHint: helpText()}
+		if out.Message == "" {
+			out.Message = "¿En qué te ayudo?"
+		}
+		return out, nil
+	}
+
+	call := *dec.Call
 	if call.Name == toolCreate && (call.Args["company"] == "" || call.Args["title"] == "") {
 		return Reply{
 			Message:  "Para crear hace falta company y title.",
 			Tool:     toolCreate,
 			Args:     call.Args,
-			HelpHint: `Ejemplo: crea Acme | Backend Go   o   crear company=Acme title="Dev Go"`,
+			HelpHint: `Ejemplo: crea Acme | Backend Go`,
+			Brain:    dec.Source,
 		}, nil
 	}
 	if call.Name == toolPatch && call.Args["id"] == "" {
@@ -57,6 +74,7 @@ func (a *Agent) Chat(ctx context.Context, userMessage string) (Reply, error) {
 			Tool:     toolPatch,
 			Args:     call.Args,
 			HelpHint: `Ejemplo: patch id=<uuid> status=enviada`,
+			Brain:    dec.Source,
 		}, nil
 	}
 	if call.Name == toolPatch && call.Args["status"] == "" && call.Args["company"] == "" &&
@@ -66,6 +84,7 @@ func (a *Agent) Chat(ctx context.Context, userMessage string) (Reply, error) {
 			Tool:     toolPatch,
 			Args:     call.Args,
 			HelpHint: `Ejemplo: actualiza <uuid> status=entretien`,
+			Brain:    dec.Source,
 		}, nil
 	}
 
@@ -73,11 +92,15 @@ func (a *Agent) Chat(ctx context.Context, userMessage string) (Reply, error) {
 	if err != nil {
 		return Reply{}, err
 	}
+	if dec.Message != "" {
+		text = dec.Message + " " + text
+	}
 	return Reply{
 		Message: text,
 		Tool:    call.Name,
 		Args:    call.Args,
 		Result:  result,
+		Brain:   dec.Source,
 	}, nil
 }
 

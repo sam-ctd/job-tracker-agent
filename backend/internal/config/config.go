@@ -11,6 +11,11 @@ type Config struct {
 	Port        string
 	APIKey      string
 	CORSOrigins []string
+
+	// Optional LLM (OpenAI-compatible). Empty API key → rules brain only.
+	LLMAPIKey  string
+	LLMBaseURL string
+	LLMModel   string
 }
 
 func Load() (Config, error) {
@@ -18,9 +23,18 @@ func Load() (Config, error) {
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		Port:        os.Getenv("PORT"),
 		APIKey:      os.Getenv("APP_API_KEY"),
+		LLMAPIKey:   os.Getenv("LLM_API_KEY"),
+		LLMBaseURL:  os.Getenv("LLM_BASE_URL"),
+		LLMModel:    os.Getenv("LLM_MODEL"),
 	}
 	if cfg.Port == "" {
 		cfg.Port = "8088"
+	}
+	if cfg.LLMBaseURL == "" {
+		cfg.LLMBaseURL = "https://api.openai.com/v1"
+	}
+	if cfg.LLMModel == "" {
+		cfg.LLMModel = "gpt-4o-mini"
 	}
 	if cfg.DatabaseURL == "" {
 		return cfg, fmt.Errorf("DATABASE_URL is required")
