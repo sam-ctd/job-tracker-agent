@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sam-ctd/job-tracker-agent/internal/agent"
 	"github.com/sam-ctd/job-tracker-agent/internal/store"
 )
 
 type Server struct {
 	store       *store.Store
+	agent       *agent.Agent
 	pool        *pgxpool.Pool
 	apiKey      string
 	corsOrigins []string
@@ -19,6 +21,7 @@ type Server struct {
 func New(st *store.Store, pool *pgxpool.Pool, apiKey string, corsOrigins []string) *Server {
 	return &Server{
 		store:       st,
+		agent:       agent.New(st),
 		pool:        pool,
 		apiKey:      apiKey,
 		corsOrigins: corsOrigins,
@@ -39,6 +42,7 @@ func (s *Server) Handler() http.Handler {
 	api.HandleFunc("PATCH /applications/{id}", s.handlePatchApplication)
 	api.HandleFunc("DELETE /applications/{id}", s.handleDeleteApplication)
 	api.HandleFunc("GET /stats", s.handleStats)
+	api.HandleFunc("POST /chat", s.handleChat)
 
 	mux.Handle("/api/", http.StripPrefix("/api", s.withAuth(api)))
 
