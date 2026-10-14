@@ -4,17 +4,21 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
+	"github.com/sam-ctd/job-tracker-agent/internal/api"
+	"github.com/sam-ctd/job-tracker-agent/internal/config"
 	"github.com/sam-ctd/job-tracker-agent/internal/db"
+	"github.com/sam-ctd/job-tracker-agent/internal/store"
 )
 
 func main() {
-	ctx := context.Background()
-	databaseURL := os.Getenv("DATABASE_URL")
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("config: %v", err)
+	}
 
-	pool, err := db.Connect(ctx, databaseURL)
+	ctx := context.Background()
+	pool, err := db.Connect(ctx, cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("db connect: %v", err)
 	}
@@ -24,28 +28,12 @@ func main() {
 		log.Fatalf("db migrate: %v", err)
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	})
-	mux.HandleFunc("GET /ready", func(w http.ResponseWriter, r *http.Request) {
-		pingCtx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
-		defer cancel()
-		if err := pool.Ping(pingCtx); err != nil {
-			http.Error(w, `{"status":"not_ready"}`, http.StatusServiceUnavailable)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"ready"}`))
-	})
+	st := store.New(pool)
+	srv := api.New(st, pool, cfg.APIKey, cfg.CORSOrigins)
 
-	addr := ":8088"
-	if p := os.Getenv("PORT"); p != "" {
-		addr = ":" + p
-	}
+	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, srv.Handler()); err != nil {
 		log.Fatal(err)
 	}
 }
