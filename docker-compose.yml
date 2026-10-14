@@ -17,5 +17,25 @@ services:
       retries: 10
     restart: unless-stopped
 
+  backend:
+    build: ./backend
+    container_name: job-tracker-api
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
+      APP_API_KEY: ${APP_API_KEY}
+      PORT: ${PORT:-8088}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3847}
+    ports:
+      - "${PORT:-8088}:${PORT:-8088}"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8088/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
 volumes:
   pgdata:
