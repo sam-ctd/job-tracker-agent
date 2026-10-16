@@ -7,7 +7,8 @@ Utile pour ne pas perdre le fil des relances - et pour montrer un full-stack + a
 **Pourquoi ce projet :** apprendre en construisant une API Go réelle, un front React, Docker Compose, et un agent avec tools (rules → LLM optionnel) plutôt qu'un CRUD isolé.
 
 **Stack:** Go (API) · Postgres · React · Docker Compose  
-**Optionnel:** LLM OpenAI-compatible (sinon le chat tourne en mode *rules*)
+**Optionnel:** LLM OpenAI-compatible (sinon le chat tourne en mode *rules*)  
+**Outil:** développé et brainstormé avec [Cursor](https://cursor.com)
 
 
 
