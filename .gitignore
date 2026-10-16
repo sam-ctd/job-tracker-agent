@@ -1,4 +1,7 @@
 .env
+frontend/.env
 JOURNAL.md
 DIAGRAMS.md
 *.mmd
+node_modules/
+frontend/dist/

@@ -44,7 +44,7 @@ func Load() (Config, error) {
 	}
 	raw := os.Getenv("CORS_ORIGINS")
 	if raw == "" {
-		raw = "http://localhost:5173,http://localhost:3847"
+		raw = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3847"
 	}
 	for _, o := range strings.Split(raw, ",") {
 		o = strings.TrimSpace(o)
