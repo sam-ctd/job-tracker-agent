@@ -41,6 +41,15 @@ cp .env.example .env   # VITE_API_URL + VITE_API_KEY
 npm install && npm run dev
 ```
 
+## Tests
+
+```bash
+cd backend && go test ./...
+cd frontend && npm ci && npm run build
+```
+
+CI GitHub Actions: `.github/workflows/ci.yml` (tests Go + build React).
+
 ## Vérifier
 
 Voir [SMOKE.md](./SMOKE.md) — checklist UI + `.\scripts\smoke.ps1`

@@ -2,6 +2,8 @@
 
 Avec Compose déjà up (`docker compose up -d`).
 
+Tests unitaires / build: `cd backend && go test ./...` · `cd frontend && npm run build`
+
 ## Checklist
 
 - [ ] UI http://localhost:3847 → **API ok**
