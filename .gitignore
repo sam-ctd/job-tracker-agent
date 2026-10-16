@@ -4,6 +4,7 @@ JOURNAL.md
 DIAGRAMS.md
 USO.md
 Abrir Job Tracker.vbs
+scripts/seed-linkedin.json
 *.mmd
 node_modules/
 frontend/dist/
