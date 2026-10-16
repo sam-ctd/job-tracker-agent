@@ -2,6 +2,8 @@
 frontend/.env
 JOURNAL.md
 DIAGRAMS.md
+USO.md
+Abrir Job Tracker.vbs
 *.mmd
 node_modules/
 frontend/dist/
