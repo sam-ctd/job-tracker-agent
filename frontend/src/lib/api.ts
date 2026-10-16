@@ -1,6 +1,13 @@
 import type { Application, ApplicationInput, ChatReply, Stats } from "../types"
 
-const baseURL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") || "http://localhost:8088"
+// Docker: VITE_API_URL="" → same-origin (/api via nginx). Dev: frontend/.env → :8088.
+function resolveBaseURL(): string {
+  const raw = import.meta.env.VITE_API_URL as string | undefined
+  if (raw === undefined) return "http://localhost:8088"
+  return String(raw).replace(/\/$/, "")
+}
+
+const baseURL = resolveBaseURL()
 const apiKey = (import.meta.env.VITE_API_KEY as string | undefined) || ""
 
 export class ApiError extends Error {
