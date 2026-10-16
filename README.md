@@ -41,6 +41,10 @@ cp .env.example .env   # VITE_API_URL + VITE_API_KEY
 npm install && npm run dev
 ```
 
+## Vérifier
+
+Voir [SMOKE.md](./SMOKE.md) — checklist UI + `.\scripts\smoke.ps1`
+
 ## Notes
 
 - LLM: `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`
