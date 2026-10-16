@@ -857,10 +857,11 @@ button.danger {
   border-radius: 14px;
   padding: 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  display: grid;
-  grid-template-rows: auto minmax(52px, 1fr) auto auto;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  height: 210px;
+  min-height: 210px;
+  height: auto;
   box-sizing: border-box;
   cursor: grab;
 }
@@ -951,16 +952,19 @@ button.danger {
 .board-meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   font-size: 12px;
   color: var(--text-2);
-  min-height: 48px;
+  flex-shrink: 0;
+  line-height: 1.35;
 }
 
 .board-meta span {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .board-created {

@@ -100,7 +100,7 @@ export function Kanban({ apps, onEdit, onDelete, onMove, loading }: Props) {
                   </button>
 
                   <div className="board-meta">
-                    <span>{app.contact || "—"}</span>
+                    {app.contact ? <span>{app.contact}</span> : null}
                     <span>
                       {app.next_follow_up
                         ? `Follow-up ${new Date(app.next_follow_up).toLocaleDateString()}`
