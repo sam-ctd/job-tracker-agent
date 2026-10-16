@@ -1,4 +1,4 @@
-import type { Application, ApplicationInput, Stats } from "../types"
+import type { Application, ApplicationInput, ChatReply, Stats } from "../types"
 
 const baseURL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") || "http://localhost:8088"
 const apiKey = (import.meta.env.VITE_API_KEY as string | undefined) || ""
@@ -86,6 +86,13 @@ export function patchApplication(id: string, input: Partial<ApplicationInput>) {
 
 export function deleteApplication(id: string) {
   return request<void>(`/api/applications/${id}`, { method: "DELETE" })
+}
+
+export function chat(message: string) {
+  return request<ChatReply>("/api/chat", {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  })
 }
 
 function toCreatePayload(input: ApplicationInput) {

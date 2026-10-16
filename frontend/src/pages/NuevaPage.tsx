@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { ApplicationForm } from "../components/ApplicationForm"
+import { ChatPanel } from "../components/ChatPanel"
 import { createApplication, getApplication, patchApplication } from "../lib/api"
 import type { Application, ApplicationInput } from "../types"
 
@@ -69,12 +70,7 @@ export function NuevaPage() {
             />
           )}
         </section>
-        <section className="panel">
-          <h2>Chat</h2>
-          <p className="muted">
-            Panel del agente (<code>POST /api/chat</code>) en <strong>4d</strong>.
-          </p>
-        </section>
+        <ChatPanel onChanged={() => undefined} />
       </div>
     </div>
   )

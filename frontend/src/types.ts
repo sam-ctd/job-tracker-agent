@@ -76,3 +76,19 @@ export type Stats = {
   by_channel: Record<string, number>
   total: number
 }
+
+export type ChatMessage = {
+  role: "user" | "assistant"
+  content: string
+  tool?: string
+  brain?: string
+}
+
+export type ChatReply = {
+  message: string
+  tool?: string
+  args?: Record<string, string>
+  result?: unknown
+  help_hint?: string
+  brain?: string
+}
