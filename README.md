@@ -2,10 +2,18 @@
 
 App pour suivre des **candidatures de stage / job** : pipeline (idea → offre / refus), kanban, et un **agent chat** qui appelle des tools (stats, liste, due, créer, patch) sur la même API.
 
-Utile pour ne pas perdre le fil des relances - et pour montrer un full-stack + agent LLM simple.
+Utile pour ne pas perdre le fil des relances — et pour montrer un full-stack + agent LLM simple.
 
-**Stack:** Go (API), Postgres, React, Docker Compose  
+**Pourquoi ce projet :** apprendre en construisant une API Go réelle, un front React, Docker Compose, et un agent avec tools (rules → LLM optionnel) plutôt qu'un CRUD isolé.
+
+**Stack:** Go (API) · Postgres · React · Docker Compose  
 **Optionnel:** LLM OpenAI-compatible (sinon le chat tourne en mode *rules*)
+
+
+
+![Kanban](docs/kanban.png)
+
+![Nouvelle candidature + chat](docs/nueva.png)
 
 ## Lancer
 
@@ -23,11 +31,11 @@ docker compose up --build -d
 
 ## Utiliser
 
-1. **Kanban** - colonnes par status, drag & drop, follow-ups  
-2. **Nueva** - formulaire + chat agent  
+1. **Kanban** — colonnes par status, drag & drop, follow-ups
+2. **Nueva** — formulaire + chat agent
 3. Auth = `APP_API_KEY` (Bearer ; déjà dans le frontend Compose)
 
-Sans `LLM_API_KEY`, le chat comprend des phrases type *stats*, *lista*, *due*, *crea Acme \| Stage Go*.
+Sans `LLM_API_KEY`, le chat comprend des phrases type *stats*, *lista*, *due*, *crea Acme  Stage Go*.
 
 ## Dev local (optionnel)
 
