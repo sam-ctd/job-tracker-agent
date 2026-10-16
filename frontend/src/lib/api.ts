@@ -1,3 +1,5 @@
+import type { Application, Stats } from "../types"
+
 const baseURL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") || "http://localhost:8088"
 const apiKey = (import.meta.env.VITE_API_KEY as string | undefined) || ""
 
@@ -41,6 +43,37 @@ export function getHealth() {
 
 export function getReady() {
   return request<Health>("/ready", {}, false)
+}
+
+export function listApplications(status = "", company = "") {
+  const q = new URLSearchParams()
+  if (status) q.set("status", status)
+  if (company) q.set("company", company)
+  const qs = q.toString()
+  return request<Application[]>(`/api/applications${qs ? `?${qs}` : ""}`)
+}
+
+export function listDue() {
+  return request<Application[]>("/api/applications/due")
+}
+
+export function getStats() {
+  return request<Stats>("/api/stats")
+}
+
+export function getApplication(id: string) {
+  return request<Application>(`/api/applications/${id}`)
+}
+
+export function patchApplication(id: string, body: Record<string, unknown>) {
+  return request<Application>(`/api/applications/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  })
+}
+
+export function deleteApplication(id: string) {
+  return request<void>(`/api/applications/${id}`, { method: "DELETE" })
 }
 
 export { baseURL }
