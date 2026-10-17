@@ -1,5 +1,5 @@
 import type { Application } from "../types"
-import { channelLabel } from "../types"
+import { channelLabel, priorityLabel } from "../types"
 
 type Props = {
   due: Application[]
@@ -29,7 +29,13 @@ export function FollowUps({ due, loading, onEdit }: Props) {
             <li key={app.id} className="followups-card">
               <div className="followups-card-top">
                 <span className="channel-tag">{channelLabel(app.channel)}</span>
-                <span className={`status-dot status-${app.status}`} title={app.status} />
+                <span
+                  className={`priority-badge priority-${app.priority || "media"}`}
+                  title={`Prioridad ${priorityLabel(app.priority || "media")}`}
+                >
+                  <span className={`priority-dot priority-${app.priority || "media"}`} />
+                  {priorityLabel(app.priority || "media")}
+                </span>
               </div>
               <div className="followups-card-body">
                 <strong>{app.company}</strong>

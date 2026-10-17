@@ -59,6 +59,7 @@ func Catalog() []ToolSpec {
 				"url":      "string?",
 				"channel":  "string? default linkedin",
 				"status":   "string? default idea",
+				"priority": "string? alta|media|baja default media",
 				"notes":    "string?",
 				"contact":  "string?",
 				"location": "string?",
@@ -70,12 +71,13 @@ func Catalog() []ToolSpec {
 			Name:        toolPatch,
 			Description: "Actualiza campos de una candidatura por id (UUID).",
 			Params: map[string]string{
-				"id":     "uuid required",
-				"status": "string?",
-				"company": "string?",
-				"title":  "string?",
-				"notes":  "string?",
-				"channel": "string?",
+				"id":       "uuid required",
+				"status":   "string?",
+				"priority": "string? alta|media|baja",
+				"company":  "string?",
+				"title":    "string?",
+				"notes":    "string?",
+				"channel":  "string?",
 			},
 		},
 	}
@@ -111,6 +113,7 @@ func runTool(ctx context.Context, st *store.Store, call Call) (any, string, erro
 			URL:      call.Args["url"],
 			Channel:  call.Args["channel"],
 			Status:   call.Args["status"],
+			Priority: call.Args["priority"],
 			Notes:    call.Args["notes"],
 			Contact:  call.Args["contact"],
 			Location: call.Args["location"],
@@ -140,6 +143,9 @@ func runTool(ctx context.Context, st *store.Store, call Call) (any, string, erro
 		}
 		if v, ok := call.Args["channel"]; ok && v != "" {
 			patch.Channel = &v
+		}
+		if v, ok := call.Args["priority"]; ok && v != "" {
+			patch.Priority = &v
 		}
 		app, err := st.Patch(ctx, id, patch)
 		if err != nil {

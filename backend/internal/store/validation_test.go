@@ -8,7 +8,7 @@ import (
 )
 
 func TestValidateFieldsOK(t *testing.T) {
-	err := validateFields("Acme", "Stage Go", "https://example.com", "linkedin", "idea", "n", "c", "Lyon", "remote", "Go")
+	err := validateFields("Acme", "Stage Go", "https://example.com", "linkedin", "idea", "media", "n", "c", "Lyon", "remote", "Go")
 	if err != nil {
 		t.Fatalf("expected nil, got %v", err)
 	}
@@ -20,16 +20,19 @@ func TestValidateFieldsRejects(t *testing.T) {
 		fn   func() error
 	}{
 		{"empty company", func() error {
-			return validateFields("", "t", "", "linkedin", "idea", "", "", "", "", "")
+			return validateFields("", "t", "", "linkedin", "idea", "media", "", "", "", "", "")
 		}},
 		{"bad url", func() error {
-			return validateFields("Acme", "t", "ftp://x", "linkedin", "idea", "", "", "", "", "")
+			return validateFields("Acme", "t", "ftp://x", "linkedin", "idea", "media", "", "", "", "", "")
 		}},
 		{"bad status", func() error {
-			return validateFields("Acme", "t", "", "linkedin", "nope", "", "", "", "", "")
+			return validateFields("Acme", "t", "", "linkedin", "nope", "media", "", "", "", "", "")
 		}},
 		{"bad channel", func() error {
-			return validateFields("Acme", "t", "", "twitter", "idea", "", "", "", "", "")
+			return validateFields("Acme", "t", "", "twitter", "idea", "media", "", "", "", "", "")
+		}},
+		{"bad priority", func() error {
+			return validateFields("Acme", "t", "", "linkedin", "idea", "urgent", "", "", "", "", "")
 		}},
 	}
 	for _, tc := range cases {
@@ -52,6 +55,9 @@ func TestNormalizeCreateDefaults(t *testing.T) {
 	}
 	if in.Status != models.StatusIdea || in.Channel != models.ChannelLinkedIn {
 		t.Fatalf("unexpected defaults: %+v", in)
+	}
+	if in.Priority != models.PriorityMedia {
+		t.Fatalf("expected default priority media, got %q", in.Priority)
 	}
 	if in.Company != "Acme" || in.Title != "Stage" {
 		t.Fatalf("trim failed: %+v", in)

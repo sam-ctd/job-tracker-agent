@@ -1,6 +1,14 @@
 import { useState, type DragEvent } from "react"
 import type { Application } from "../types"
-import { channelLabel, STATUSES } from "../types"
+import { channelLabel, priorityLabel, priorityRank, STATUSES } from "../types"
+
+function sortByPriority(apps: Application[]): Application[] {
+  return [...apps].sort((a, b) => {
+    const pr = priorityRank(a.priority) - priorityRank(b.priority)
+    if (pr !== 0) return pr
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  })
+}
 
 type Props = {
   apps: Application[]
@@ -52,7 +60,7 @@ export function Kanban({ apps, onEdit, onDelete, onMove, loading }: Props) {
   return (
     <div className="board">
       {STATUSES.map((status) => {
-        const col = apps.filter((a) => a.status === status)
+        const col = sortByPriority(apps.filter((a) => a.status === status))
         return (
           <section
             key={status}
@@ -91,7 +99,13 @@ export function Kanban({ apps, onEdit, onDelete, onMove, loading }: Props) {
                 >
                   <div className="board-card-top">
                     <span className="channel-tag">{channelLabel(app.channel)}</span>
-                    <span className={`status-dot status-${app.status}`} title={app.status} />
+                    <span
+                      className={`priority-badge priority-${app.priority || "media"}`}
+                      title={`Prioridad ${priorityLabel(app.priority || "media")}`}
+                    >
+                      <span className={`priority-dot priority-${app.priority || "media"}`} />
+                      {priorityLabel(app.priority || "media")}
+                    </span>
                   </div>
 
                   <button type="button" className="board-card-title" onClick={() => onEdit(app)}>

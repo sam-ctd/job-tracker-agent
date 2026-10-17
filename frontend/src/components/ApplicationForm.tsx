@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
 import type { Application, ApplicationInput } from "../types"
-import { CHANNELS, CHANNEL_LABELS, STATUSES } from "../types"
+import { CHANNELS, CHANNEL_LABELS, PRIORITIES, PRIORITY_LABELS, STATUSES } from "../types"
 
 const empty: ApplicationInput = {
   company: "",
@@ -8,6 +8,7 @@ const empty: ApplicationInput = {
   url: "",
   channel: "linkedin",
   status: "idea",
+  priority: "media",
   notes: "",
   contact: "",
   location: "",
@@ -38,6 +39,7 @@ export function ApplicationForm({ initial, onSubmit, onCancel, busy }: Props) {
       url: initial.url,
       channel: initial.channel,
       status: initial.status,
+      priority: initial.priority || "media",
       notes: initial.notes,
       contact: initial.contact,
       location: initial.location || "",
@@ -53,6 +55,7 @@ export function ApplicationForm({ initial, onSubmit, onCancel, busy }: Props) {
     if (input.url && !/^https?:\/\//i.test(input.url.trim())) return "url debe ser http(s)"
     if (!CHANNELS.includes(input.channel as (typeof CHANNELS)[number])) return "channel inválido"
     if (!STATUSES.includes(input.status as (typeof STATUSES)[number])) return "status inválido"
+    if (!PRIORITIES.includes(input.priority as (typeof PRIORITIES)[number])) return "prioridad inválida"
     return ""
   }
 
@@ -130,20 +133,39 @@ export function ApplicationForm({ initial, onSubmit, onCancel, busy }: Props) {
           </div>
         </div>
 
-        <div className="field-block">
-          <span className="field-label">Estado</span>
-          <div className="status-picker" role="group" aria-label="Estado">
-            {STATUSES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className={`status-option status-${s}${form.status === s ? " is-active" : ""}`}
-                onClick={() => setForm({ ...form, status: s })}
-              >
-                <span className={`status-dot status-${s}`} />
-                {s}
-              </button>
-            ))}
+        <div className="pipeline-row">
+          <div className="field-block pipeline-status">
+            <span className="field-label">Estado</span>
+            <div className="status-picker" role="group" aria-label="Estado">
+              {STATUSES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`status-option status-${s}${form.status === s ? " is-active" : ""}`}
+                  onClick={() => setForm({ ...form, status: s })}
+                >
+                  <span className={`status-dot status-${s}`} />
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="field-block pipeline-priority">
+            <span className="field-label">Prioridad</span>
+            <div className="chip-row" role="group" aria-label="Prioridad">
+              {PRIORITIES.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className={`chip priority-chip priority-${p}${form.priority === p ? " is-active" : ""}`}
+                  onClick={() => setForm({ ...form, priority: p })}
+                >
+                  <span className={`priority-dot priority-${p}`} />
+                  {PRIORITY_LABELS[p]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -207,7 +229,7 @@ export function ApplicationForm({ initial, onSubmit, onCancel, busy }: Props) {
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             maxLength={5000}
-            rows={3}
+            rows={5}
             placeholder="Contexto, recordatorios…"
           />
         </label>

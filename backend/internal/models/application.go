@@ -19,6 +19,10 @@ const (
 	ChannelLesJeudis      = "lesjeudis"
 	ChannelChooseYourBoss = "chooseyourboss"
 	ChannelAlumniESTIA    = "alumni_estia"
+
+	PriorityAlta  = "alta"
+	PriorityMedia = "media"
+	PriorityBaja  = "baja"
 )
 
 var AllowedStatuses = map[string]struct{}{
@@ -32,6 +36,10 @@ var AllowedChannels = map[string]struct{}{
 	ChannelLesJeudis: {}, ChannelChooseYourBoss: {}, ChannelAlumniESTIA: {},
 }
 
+var AllowedPriorities = map[string]struct{}{
+	PriorityAlta: {}, PriorityMedia: {}, PriorityBaja: {},
+}
+
 type Application struct {
 	ID           string     `json:"id"`
 	Company      string     `json:"company"`
@@ -39,6 +47,7 @@ type Application struct {
 	URL          string     `json:"url"`
 	Channel      string     `json:"channel"`
 	Status       string     `json:"status"`
+	Priority     string     `json:"priority"`
 	SentAt       *time.Time `json:"sent_at"`
 	NextFollowUp *time.Time `json:"next_follow_up"`
 	Notes        string     `json:"notes"`
@@ -56,6 +65,7 @@ type ApplicationCreate struct {
 	URL          string     `json:"url"`
 	Channel      string     `json:"channel"`
 	Status       string     `json:"status"`
+	Priority     string     `json:"priority"`
 	SentAt       *time.Time `json:"sent_at"`
 	NextFollowUp *time.Time `json:"next_follow_up"`
 	Notes        string     `json:"notes"`
@@ -71,6 +81,7 @@ type ApplicationPatch struct {
 	URL           *string    `json:"url"`
 	Channel       *string    `json:"channel"`
 	Status        *string    `json:"status"`
+	Priority      *string    `json:"priority"`
 	SentAt        *time.Time `json:"sent_at"`
 	NextFollowUp  *time.Time `json:"next_follow_up"`
 	ClearSentAt   bool       `json:"clear_sent_at"`

@@ -12,7 +12,9 @@ import (
 	"github.com/sam-ctd/job-tracker-agent/internal/models"
 )
 
-const appColumns = `id, company, title, url, channel, status, sent_at, next_follow_up, notes, contact, location, remote, stack, created_at, updated_at`
+const appColumns = `id, company, title, url, channel, status, priority, sent_at, next_follow_up, notes, contact, location, remote, stack, created_at, updated_at`
+
+const priorityOrder = `CASE priority WHEN 'alta' THEN 0 WHEN 'media' THEN 1 WHEN 'baja' THEN 2 ELSE 3 END`
 
 func (s *Store) List(ctx context.Context, status, company string) ([]models.Application, error) {
 	q := `SELECT ` + appColumns + ` FROM applications WHERE 1=1`
@@ -28,7 +30,7 @@ func (s *Store) List(ctx context.Context, status, company string) ([]models.Appl
 		args = append(args, "%"+company+"%")
 		n++
 	}
-	q += ` ORDER BY updated_at DESC`
+	q += ` ORDER BY ` + priorityOrder + `, updated_at DESC`
 
 	rows, err := s.pool.Query(ctx, q, args...)
 	if err != nil {
@@ -53,10 +55,10 @@ func (s *Store) Create(ctx context.Context, in models.ApplicationCreate) (models
 		return models.Application{}, err
 	}
 	row := s.pool.QueryRow(ctx, `
-		INSERT INTO applications (company, title, url, channel, status, sent_at, next_follow_up, notes, contact, location, remote, stack)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		INSERT INTO applications (company, title, url, channel, status, priority, sent_at, next_follow_up, notes, contact, location, remote, stack)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 		RETURNING `+appColumns,
-		in.Company, in.Title, in.URL, in.Channel, in.Status, in.SentAt, in.NextFollowUp,
+		in.Company, in.Title, in.URL, in.Channel, in.Status, in.Priority, in.SentAt, in.NextFollowUp,
 		in.Notes, in.Contact, in.Location, in.Remote, in.Stack,
 	)
 	return scanApp(row)
@@ -76,12 +78,12 @@ func (s *Store) Patch(ctx context.Context, id string, in models.ApplicationPatch
 	}
 	row := s.pool.QueryRow(ctx, `
 		UPDATE applications SET
-			company=$2, title=$3, url=$4, channel=$5, status=$6,
-			sent_at=$7, next_follow_up=$8, notes=$9, contact=$10,
-			location=$11, remote=$12, stack=$13, updated_at=NOW()
+			company=$2, title=$3, url=$4, channel=$5, status=$6, priority=$7,
+			sent_at=$8, next_follow_up=$9, notes=$10, contact=$11,
+			location=$12, remote=$13, stack=$14, updated_at=NOW()
 		WHERE id=$1
 		RETURNING `+appColumns,
-		id, merged.Company, merged.Title, merged.URL, merged.Channel, merged.Status,
+		id, merged.Company, merged.Title, merged.URL, merged.Channel, merged.Status, merged.Priority,
 		merged.SentAt, merged.NextFollowUp, merged.Notes, merged.Contact,
 		merged.Location, merged.Remote, merged.Stack,
 	)
@@ -108,7 +110,7 @@ func (s *Store) Due(ctx context.Context) ([]models.Application, error) {
 		FROM applications
 		WHERE next_follow_up IS NOT NULL AND next_follow_up <= NOW()
 		  AND status NOT IN ('offre', 'refus')
-		ORDER BY next_follow_up ASC`)
+		ORDER BY `+priorityOrder+`, next_follow_up ASC`)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +162,7 @@ type scannable interface {
 func scanApp(row scannable) (models.Application, error) {
 	var a models.Application
 	err := row.Scan(
-		&a.ID, &a.Company, &a.Title, &a.URL, &a.Channel, &a.Status,
+		&a.ID, &a.Company, &a.Title, &a.URL, &a.Channel, &a.Status, &a.Priority,
 		&a.SentAt, &a.NextFollowUp, &a.Notes, &a.Contact,
 		&a.Location, &a.Remote, &a.Stack, &a.CreatedAt, &a.UpdatedAt,
 	)
@@ -196,6 +198,7 @@ func normalizeCreate(in models.ApplicationCreate) (models.ApplicationCreate, err
 	in.URL = strings.TrimSpace(in.URL)
 	in.Channel = strings.TrimSpace(in.Channel)
 	in.Status = strings.TrimSpace(in.Status)
+	in.Priority = strings.TrimSpace(in.Priority)
 	in.Notes = strings.TrimSpace(in.Notes)
 	in.Contact = strings.TrimSpace(in.Contact)
 	in.Location = strings.TrimSpace(in.Location)
@@ -208,7 +211,10 @@ func normalizeCreate(in models.ApplicationCreate) (models.ApplicationCreate, err
 	if in.Channel == "" {
 		in.Channel = models.ChannelLinkedIn
 	}
-	if err := validateFields(in.Company, in.Title, in.URL, in.Channel, in.Status, in.Notes, in.Contact, in.Location, in.Remote, in.Stack); err != nil {
+	if in.Priority == "" {
+		in.Priority = models.PriorityMedia
+	}
+	if err := validateFields(in.Company, in.Title, in.URL, in.Channel, in.Status, in.Priority, in.Notes, in.Contact, in.Location, in.Remote, in.Stack); err != nil {
 		return in, err
 	}
 	return in, nil
@@ -229,6 +235,9 @@ func applyPatch(cur models.Application, in models.ApplicationPatch) (models.Appl
 	}
 	if in.Status != nil {
 		cur.Status = strings.TrimSpace(*in.Status)
+	}
+	if in.Priority != nil {
+		cur.Priority = strings.TrimSpace(*in.Priority)
 	}
 	if in.ClearSentAt {
 		cur.SentAt = nil
@@ -255,13 +264,16 @@ func applyPatch(cur models.Application, in models.ApplicationPatch) (models.Appl
 	if in.Stack != nil {
 		cur.Stack = strings.TrimSpace(*in.Stack)
 	}
-	if err := validateFields(cur.Company, cur.Title, cur.URL, cur.Channel, cur.Status, cur.Notes, cur.Contact, cur.Location, cur.Remote, cur.Stack); err != nil {
+	if cur.Priority == "" {
+		cur.Priority = models.PriorityMedia
+	}
+	if err := validateFields(cur.Company, cur.Title, cur.URL, cur.Channel, cur.Status, cur.Priority, cur.Notes, cur.Contact, cur.Location, cur.Remote, cur.Stack); err != nil {
 		return cur, err
 	}
 	return cur, nil
 }
 
-func validateFields(company, title, urlStr, channel, status, notes, contact, location, remote, stack string) error {
+func validateFields(company, title, urlStr, channel, status, priority, notes, contact, location, remote, stack string) error {
 	if company == "" || len(company) > 200 {
 		return fmt.Errorf("%w: company", ErrValidation)
 	}
@@ -282,6 +294,9 @@ func validateFields(company, title, urlStr, channel, status, notes, contact, loc
 	}
 	if _, ok := models.AllowedStatuses[status]; !ok {
 		return fmt.Errorf("%w: status", ErrValidation)
+	}
+	if _, ok := models.AllowedPriorities[priority]; !ok {
+		return fmt.Errorf("%w: priority", ErrValidation)
 	}
 	if len(notes) > 5000 {
 		return fmt.Errorf("%w: notes", ErrValidation)

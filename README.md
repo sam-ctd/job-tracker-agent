@@ -12,9 +12,9 @@ Utile pour ne pas perdre le fil des relances - et pour montrer un full-stack + a
 
 
 
-![Kanban](docs/kanban.png)
+![Kanban avec priorités Alta / Media / Baja](docs/kanban.png)
 
-![Nouvelle candidature + chat](docs/nueva.png)
+![Formulaire Nueva + chat agent](docs/nueva.png)
 
 ## Lancer
 

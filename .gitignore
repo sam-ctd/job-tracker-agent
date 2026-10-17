@@ -5,6 +5,8 @@ DIAGRAMS.md
 USO.md
 Abrir Job Tracker.vbs
 scripts/seed-linkedin.json
+scripts/_apps_dump.json
+scripts/rewrite-notes.py
 *.mmd
 node_modules/
 frontend/dist/

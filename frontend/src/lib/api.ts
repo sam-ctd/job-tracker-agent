@@ -109,6 +109,7 @@ function toCreatePayload(input: ApplicationInput) {
     url: input.url.trim(),
     channel: input.channel,
     status: input.status,
+    priority: input.priority,
     notes: input.notes.trim(),
     contact: input.contact.trim(),
     location: input.location.trim(),
@@ -128,6 +129,7 @@ function toPatchPayload(input: Partial<ApplicationInput>) {
   if (input.url !== undefined) body.url = input.url.trim()
   if (input.channel !== undefined) body.channel = input.channel
   if (input.status !== undefined) body.status = input.status
+  if (input.priority !== undefined) body.priority = input.priority
   if (input.notes !== undefined) body.notes = input.notes.trim()
   if (input.contact !== undefined) body.contact = input.contact.trim()
   if (input.location !== undefined) body.location = input.location.trim()

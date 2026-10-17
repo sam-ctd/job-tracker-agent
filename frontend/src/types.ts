@@ -39,6 +39,26 @@ export function channelLabel(channel: string): string {
   return CHANNEL_LABELS[channel] || channel
 }
 
+export const PRIORITIES = ["alta", "media", "baja"] as const
+
+export type Priority = (typeof PRIORITIES)[number]
+
+export const PRIORITY_LABELS: Record<Priority, string> = {
+  alta: "Alta",
+  media: "Media",
+  baja: "Baja",
+}
+
+export function priorityLabel(priority: string): string {
+  return PRIORITY_LABELS[priority as Priority] || priority
+}
+
+/** Sort key: alta → media → baja (unknown last). */
+export function priorityRank(priority: string): number {
+  const i = PRIORITIES.indexOf(priority as Priority)
+  return i === -1 ? 99 : i
+}
+
 export type Application = {
   id: string
   company: string
@@ -46,6 +66,7 @@ export type Application = {
   url: string
   channel: Channel | string
   status: Status | string
+  priority: Priority | string
   sent_at: string | null
   next_follow_up: string | null
   notes: string
@@ -63,6 +84,7 @@ export type ApplicationInput = {
   url: string
   channel: string
   status: string
+  priority: string
   notes: string
   contact: string
   location: string

@@ -369,7 +369,7 @@ button:active {
 
 .nueva-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr);
   gap: 14px;
   align-items: stretch;
   min-height: 0;
@@ -399,7 +399,7 @@ button:active {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 7px;
   overflow: hidden;
 }
 
@@ -414,8 +414,8 @@ button:active {
 
 .form-section {
   display: grid;
-  gap: 7px;
-  padding-top: 9px;
+  gap: 6px;
+  padding-top: 7px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
 }
@@ -425,10 +425,23 @@ button:active {
   border-top: none;
 }
 
+.pipeline-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.pipeline-priority .chip-row {
+  flex-wrap: nowrap;
+}
+
 .form-section-notes {
   flex: 1;
   min-height: 0;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-section-head h3 {
@@ -530,14 +543,20 @@ button:active {
 }
 
 .notes-label {
+  flex: 1;
   min-height: 0;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .notes-label textarea {
+  flex: 1;
+  width: 100%;
   min-height: 0;
   height: 100%;
   resize: none;
+  line-height: 1.45;
+  overflow-y: auto;
 }
 
 .grid-2 {
@@ -887,12 +906,65 @@ button.danger {
   min-height: 22px;
 }
 
+.board-card-top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .channel-tag {
   color: #2dd4bf;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
+}
+
+.priority-dot.priority-alta,
+.priority-badge.priority-alta .priority-dot {
+  background: #ff453a;
+}
+
+.priority-dot.priority-media,
+.priority-badge.priority-media .priority-dot {
+  background: #ff9f0a;
+}
+
+.priority-dot.priority-baja,
+.priority-badge.priority-baja .priority-dot {
+  background: #8e8e93;
+}
+
+.priority-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.priority-chip .priority-dot {
+  width: 8px;
+  height: 8px;
+  box-shadow: none;
 }
 
 .status-dot {
@@ -1231,6 +1303,10 @@ button.danger {
 }
 
 @media (max-width: 1100px) {
+  .pipeline-row {
+    grid-template-columns: 1fr;
+  }
+
   .status-picker {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
